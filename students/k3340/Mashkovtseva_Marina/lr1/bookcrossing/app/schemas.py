@@ -160,6 +160,23 @@ class ExchangeRequestWithDetails(ExchangeRequestResponse):
     requested_book: BookResponse
     offered_book: BookResponse
 
+# Review schemas
+class ReviewCreate(BaseModel):
+    rating: int  # от 1 до 5
+    reviewed_id: int
+    comment: Optional[str] = ""
+
+class ReviewResponse(BaseModel):
+    id: int
+    rating: int
+    comment: str
+    created_at: datetime
+    reviewer_id: int
+    reviewed_id: int
+
+    class Config:
+        from_attributes = True
+
 # Обновление ссылок
 BookResponse.model_rebuild()
 UserWithBooks.model_rebuild()

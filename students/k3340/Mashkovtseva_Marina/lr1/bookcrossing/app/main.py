@@ -6,7 +6,7 @@ from app.database import init_db, get_session
 from app.models import User
 from app.schemas import Token
 from app.utils.security import verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
-from app.routers import users, books, exchange_requests, wishlist
+from app.routers import users, books, exchange_requests, wishlist, reviews
 from app.auth import get_current_user
 
 app = FastAPI(title="BookCrossing API", version="1.0.0")
@@ -16,6 +16,7 @@ app.include_router(users.router)
 app.include_router(books.router)
 app.include_router(exchange_requests.router)
 app.include_router(wishlist.router)
+app.include_router(reviews.router)
 
 
 @app.on_event("startup")
