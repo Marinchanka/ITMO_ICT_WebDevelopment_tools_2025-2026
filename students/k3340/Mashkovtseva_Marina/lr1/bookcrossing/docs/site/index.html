@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>My Docs</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/fontawesome.min.css" rel="stylesheet">
+        <link href="css/brands.min.css" rel="stylesheet">
+        <link href="css/solid.min.css" rel="stylesheet">
+        <link href="css/v4-font-face.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">My Docs</a>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#1-fastapi" class="nav-link">Лабораторная работа 1. Реализация серверного приложения FastAPI</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#_1" class="nav-link">Тема проекта</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#_2" class="nav-link">Модели данных</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#_6" class="nav-link">Подключение к БД</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#api" class="nav-link">Эндпоинты API</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#jwt" class="nav-link">Аутентификация и JWT</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#alembic" class="nav-link">Миграции (Alembic)</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#_10" class="nav-link">Запуск проекта</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="1-fastapi">Лабораторная работа 1. Реализация серверного приложения FastAPI</h1>
+<p><strong>Цели:</strong> Научиться реализовывать полноценное серверное приложение с помощью фреймворка FastAPI с применением дополнительных средств и библиотек.</p>
+<p><strong>Тема:</strong> Разработка веб-приложения для обмена книгами (буккросинг)</p>
+<p><strong>Студент:</strong> Машковцева Марина</p>
+<p><strong>GitHub репозиторий:</strong> <code>https://github.com/Marinchanka/ITMO_ICT_WebDevelopment_tools_2025-2026</code></p>
+<hr />
+<h2 id="_1">Тема проекта</h2>
+<p><strong>Разработка веб-приложения для буккросинга</strong></p>
+<p>Веб-приложение позволяет пользователям обмениваться книгами между собой. Функционал включает:</p>
+<ul>
+<li><strong>Создание профилей:</strong> пользователи создают профили с информацией о себе</li>
+<li><strong>Добавление книг в библиотеку:</strong> пользователи добавляют книги, которыми готовы поделиться</li>
+<li><strong>Поиск и запросы на обмен:</strong> поиск книг других пользователей, отправка запросов на обмен</li>
+<li><strong>Управление запросами:</strong> просмотр, подтверждение или отклонение запросов</li>
+</ul>
+<p><strong>Технологии:</strong>
+- FastAPI — веб-фреймворк
+- SQLModel — ORM (надстройка над SQLAlchemy)
+- PostgreSQL — база данных
+- Alembic — миграции
+- JWT + bcrypt — аутентификация и хэширование</p>
+<hr />
+<h2 id="_2">Модели данных</h2>
+<p>Все модели реализованы с помощью <strong>SQLModel</strong> в файле <code>app/models.py</code>.</p>
+<h3 id="_3">Таблицы и связи</h3>
+<table>
+<thead>
+<tr>
+<th>№</th>
+<th>Таблица</th>
+<th>Поля</th>
+<th>Связь</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>User</strong></td>
+<td>id, email, username, hashed_password, bio, city, created_at</td>
+<td></td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Book</strong></td>
+<td>id, title, author, genre, year, description, is_available, owner_id, created_at</td>
+<td>owner_id → User.id</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>ExchangeRequest</strong></td>
+<td>id, message, status, requester_id, requested_book_id, offered_book_id, created_at</td>
+<td>requester_id → User.id, requested_book_id → Book.id, offered_book_id → Book.id</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Review</strong></td>
+<td>id, rating, comment, reviewer_id, reviewed_id, created_at</td>
+<td>reviewer_id → User.id, reviewed_id → User.id</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Wishlist</strong></td>
+<td>id, user_id, book_title, book_author, created_at</td>
+<td>user_id → User.id</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_4">Связи между таблицами</h3>
+<ul>
+<li><strong>User → Book</strong> = один ко многим (один пользователь может иметь много книг)</li>
+<li><strong>User → ExchangeRequest</strong> = один ко многим (один пользователь может отправлять много запросов)</li>
+<li><strong>User → Wishlist</strong> = один ко многим (один пользователь может иметь много книг в вишлисте)</li>
+<li><strong>Book → ExchangeRequest</strong> = один ко многим (одна книга может участвовать во многих запросах)</li>
+<li><strong>User ↔ User</strong> = многие ко многим (через таблицу Review)</li>
+</ul>
+<h3 id="_5">Ассоциативная сущность</h3>
+<p><strong>ExchangeRequest</strong> — связывает User и Book, имеет дополнительное поле <code>message</code> (сообщение к запросу), что соответствует требованию.</p>
+<hr />
+<h2 id="_6">Подключение к БД</h2>
+<p><strong>Файл:</strong> <code>app/database.py</code></p>
+<pre><code class="language-python">import os
+from sqlmodel import SQLModel, Session, create_engine
+from dotenv import load_dotenv
+
+load_dotenv()
+
+db_url = os.getenv(&quot;DATABASE_URL&quot;)
+engine = create_engine(db_url, echo=True)
+
+def init_db():
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    with Session(engine) as session:
+        yield session
+</code></pre>
+<p><strong>Файл:</strong> <code>.env</code></p>
+<pre><code class="language-env">DATABASE_URL=postgresql://postgres:200516@localhost:5432/bookcrossing_db
+SECRET_KEY=your-secret-key
+ALGORITHM=HS256
+ACCESS_TOKEN_EXPIRE_MINUTES=30
+</code></pre>
+<hr />
+<h2 id="api">Эндпоинты API</h2>
+<h3 id="users">Пользователи (users)</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+<th>Авторизация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/users/register</code></td>
+<td>Регистрация нового пользователя</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/users/</code></td>
+<td>Список всех пользователей</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/users/me</code></td>
+<td>Информация о текущем пользователе</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/users/{user_id}</code></td>
+<td>Получить пользователя с его книгами</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/users/{user_id}/password</code></td>
+<td>Смена пароля</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="books">Книги (books)</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+<th>Авторизация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/books/</code></td>
+<td>Список всех книг</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/books/available</code></td>
+<td>Только доступные для обмена книги</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/books/{book_id}</code></td>
+<td>Детали книги + информация о владельце</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/books/</code></td>
+<td>Добавить новую книгу в библиотеку</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/books/{book_id}</code></td>
+<td>Удалить свою книгу</td>
+<td>✅ JWT</td>
+</tr>
+</tbody>
+</table>
+<h3 id="exchange-requests">Запросы на обмен (exchange-requests)</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+<th>Авторизация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/exchange-requests/</code></td>
+<td>Создать запрос на обмен</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/exchange-requests/</code></td>
+<td>Список моих запросов (входящие и исходящие)</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/exchange-requests/{id}</code></td>
+<td>Детали конкретного запроса</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>PUT</td>
+<td><code>/exchange-requests/{id}?status=</code></td>
+<td>Подтвердить (accepted) или отклонить (rejected)</td>
+<td>✅ JWT</td>
+</tr>
+</tbody>
+</table>
+<h3 id="wishlist">Вишлист (wishlist)</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+<th>Авторизация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/wishlist/</code></td>
+<td>Добавить книгу в список желаний</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/wishlist/</code></td>
+<td>Получить список желаний текущего пользователя</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>DELETE</td>
+<td><code>/wishlist/{id}</code></td>
+<td>Удалить книгу из вишлиста</td>
+<td>✅ JWT</td>
+</tr>
+</tbody>
+</table>
+<h3 id="reviews">Отзывы (reviews)</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+<th>Авторизация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/reviews/</code></td>
+<td>Оставить отзыв о пользователе</td>
+<td>✅ JWT</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/reviews/user/{user_id}</code></td>
+<td>Получить все отзывы о пользователе</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="auth">Аутентификация (auth)</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+<th>Авторизация</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>POST</td>
+<td><code>/token</code></td>
+<td>Получить JWT токен (логин)</td>
+<td>❌</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_7">Корневой эндпоинт</h3>
+<table>
+<thead>
+<tr>
+<th>Метод</th>
+<th>Эндпоинт</th>
+<th>Описание</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET</td>
+<td><code>/</code></td>
+<td>Приветственное сообщение</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="jwt">Аутентификация и JWT</h2>
+<h3 id="3">Реализация требования "п.3 вручную"</h3>
+<blockquote>
+<p><strong>Требование:</strong> реализовать авторизацию и JWT вручную, без использования сторонних библиотек (хэширование и создание JWT не в счет).</p>
+</blockquote>
+<p><strong>Выполнено:</strong></p>
+<ul>
+<li>
+<p><strong>JWT:</strong> библиотека <code>python-jose</code> используется <strong>только</strong> для кодирования/декодирования токенов. Логика создания токена, проверки срока действия, извлечения пользователя из токена — написана <strong>вручную</strong> в файлах <code>auth.py</code> и <code>utils/security.py</code>.</p>
+</li>
+<li>
+<p><strong>Хэширование:</strong> библиотека <code>passlib[bcrypt]</code> используется <strong>только</strong> для алгоритма хэширования. Функции-обертки <code>verify_password</code> и <code>get_password_hash</code> написаны <strong>вручную</strong> с дополнительной обработкой (обрезание пароля до 72 байт из-за ограничения bcrypt).</p>
+</li>
+<li>
+<p><strong>Аутентификация:</strong> реализована через <code>OAuth2PasswordBearer</code> и <code>Depends(get_current_user)</code> без использования готовых решений типа <code>fastapi-users</code>.</p>
+</li>
+</ul>
+<p><strong>Файлы с ручной реализацией:</strong>
+- <code>app/auth.py</code> — <code>get_current_user()</code>
+- <code>app/utils/security.py</code> — <code>create_access_token()</code>, <code>verify_password()</code>, <code>get_password_hash()</code></p>
+<h3 id="jwt_1">Пример использования JWT</h3>
+<pre><code class="language-bash"># 1. Получение токена
+POST /token
+Content-Type: application/x-www-form-urlencoded
+
+username=marina&amp;password=123456
+
+# Ответ:
+{
+  &quot;access_token&quot;: &quot;eyJhbGciOiJIUzI1NiIs...&quot;,
+  &quot;token_type&quot;: &quot;bearer&quot;
+}
+
+# 2. Использование токена для защищенного эндпоинта
+GET /users/me
+Authorization: Bearer eyJhbGciOiJIUzI1NiIs...
+</code></pre>
+<hr />
+<h2 id="alembic">Миграции (Alembic)</h2>
+<p>Миграции настроены с помощью библиотеки <strong>Alembic</strong>. Все изменения схемы БД контролируются через миграции.</p>
+<h3 id="_8">Основные команды</h3>
+<pre><code class="language-bash"># Создать новую миграцию (автоматическая генерация)
+alembic revision --autogenerate -m &quot;описание_изменений&quot;
+
+# Применить все миграции
+alembic upgrade head
+
+# Откатить последнюю миграцию
+alembic downgrade -1
+
+# Просмотреть историю миграций
+alembic history
+
+# Просмотреть текущую версию БД
+alembic current
+</code></pre>
+<h3 id="_9">Файлы миграций</h3>
+<p>Все миграции хранятся в папке migrations/versions/. Каждый файл миграции содержит:</p>
+<ul>
+<li>
+<p>upgrade() — функция применения изменений</p>
+</li>
+<li>
+<p>downgrade() — функция отката изменений</p>
+</li>
+</ul>
+<hr />
+<h2 id="_10">Запуск проекта</h2>
+<h3 id="_11">Команды для запуска</h3>
+<pre><code class="language-bash"># Применение миграций
+alembic upgrade head
+
+# Запуск сервера
+uvicorn app.main:app --reload
+</code></pre></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-04-10 09:11:13.963535+00:00
+-->
