@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="None">
+        
+        
+        <link rel="shortcut icon" href="img/favicon.ico">
+        <title>Лабораторные работы</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link href="css/fontawesome.min.css" rel="stylesheet">
+        <link href="css/brands.min.css" rel="stylesheet">
+        <link href="css/solid.min.css" rel="stylesheet">
+        <link href="css/v4-font-face.min.css" rel="stylesheet">
+        <link href="css/base.css" rel="stylesheet">
+        <link id="hljs-light" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" >
+        <link id="hljs-dark" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css" disabled>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+        <script>hljs.highlightAll();</script> 
+    </head>
+
+    <body class="homepage">
+        <div class="navbar fixed-top navbar-expand-lg navbar-dark bg-primary">
+            <div class="container">
+                <a class="navbar-brand" href=".">Лабораторные работы</a>
+
+                <!-- Expanded navigation -->
+                <div id="navbar-collapse" class="navbar-collapse collapse">
+
+                    <ul class="nav navbar-nav ms-md-auto">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#mkdocs_search_modal">
+                                <i class="fa fa-search"></i> Search
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="row">
+                    <div class="col-md-3"><div class="navbar-expand-md bs-sidebar hidden-print affix" role="complementary">
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggler collapsed" data-bs-toggle="collapse" data-bs-target="#toc-collapse" title="Table of Contents">
+            <span class="fa fa-angle-down"></span>
+        </button>
+    </div>
+
+    
+    <div id="toc-collapse" class="navbar-collapse collapse card bg-body-tertiary">
+        <ul class="nav flex-column">
+            
+            <li class="nav-item" data-bs-level="1"><a href="#2" class="nav-link">Лабораторная работа 2. Потоки. Процессы. Асинхронность.</a>
+              <ul class="nav flex-column">
+            <li class="nav-item" data-bs-level="2"><a href="#1" class="nav-link">Задача 1. Подсчёт суммы чисел</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#2-" class="nav-link">Задача 2. Параллельный парсинг веб-страниц</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+            <li class="nav-item" data-bs-level="2"><a href="#_6" class="nav-link">Общий вывод</a>
+              <ul class="nav flex-column">
+              </ul>
+            </li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+</div></div>
+                    <div class="col-md-9" role="main">
+
+<h1 id="2">Лабораторная работа 2. Потоки. Процессы. Асинхронность.</h1>
+<p><strong>Цели:</strong> Понять отличия между потоками и процессами, разобраться с асинхронностью в Python.</p>
+<p><strong>Студент:</strong> Машковцева Марина</p>
+<p><strong>GitHub репозиторий:</strong> <code>https://github.com/Marinchanka/ITMO_ICT_WebDevelopment_tools_2025-2026</code></p>
+<hr />
+<h2 id="1">Задача 1. Подсчёт суммы чисел</h2>
+<p>Каждая программа считает сумму чисел от 1 до 10 000 000, разбивая задачу на 4 части.</p>
+<h3 id="threading_sumpy">threading_sum.py</h3>
+<pre><code class="language-python">import threading
+import time
+
+N = 10000000
+NUM_THREADS = 4
+results = []
+lock = threading.Lock()
+
+def calculate_sum(start, end):
+    total = sum(range(start, end + 1))
+    with lock:
+        results.append(total)
+
+start_time = time.time()
+
+chunk = N // NUM_THREADS
+threads = []
+
+for i in range(NUM_THREADS):
+    s = i * chunk + 1
+    e = (i + 1) * chunk if i &lt; NUM_THREADS - 1 else N
+    t = threading.Thread(target=calculate_sum, args=(s, e))
+    threads.append(t)
+    t.start()
+
+for t in threads:
+    t.join()
+
+print(f&quot;Сумма: {sum(results)}&quot;)
+print(f&quot;Время: {time.time() - start_time:.4f} сек&quot;)
+</code></pre>
+<h3 id="multiprocessing_sumpy">multiprocessing_sum.py</h3>
+<pre><code class="language-python">import multiprocessing
+import time
+
+N = 10_000_000
+NUM_PROCESSES = 4
+
+def calculate_sum(start, end, queue):
+    queue.put(sum(range(start, end + 1)))
+
+if __name__ == &quot;__main__&quot;:
+    queue = multiprocessing.Queue()
+    chunk = N // NUM_PROCESSES
+    processes = []
+
+    start_time = time.time()
+
+    for i in range(NUM_PROCESSES):
+        s = i * chunk + 1
+        e = (i + 1) * chunk if i &lt; NUM_PROCESSES - 1 else N
+        p = multiprocessing.Process(target=calculate_sum, args=(s, e, queue))
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()
+
+    total = sum(queue.get() for _ in range(NUM_PROCESSES))
+    print(f&quot;Сумма: {total}&quot;)
+    print(f&quot;Время: {time.time() - start_time:.4f} сек&quot;)
+</code></pre>
+<h3 id="async_sumpy">async_sum.py</h3>
+<pre><code class="language-python">import asyncio
+import time
+
+N = 10000000
+NUM_TASKS = 4
+
+async def calculate_sum(start, end):
+    return sum(range(start, end + 1))
+
+async def main():
+    chunk = N // NUM_TASKS
+    tasks = []
+
+    for i in range(NUM_TASKS):
+        s = i * chunk + 1
+        e = (i + 1) * chunk if i &lt; NUM_TASKS - 1 else N
+        tasks.append(calculate_sum(s, e))
+
+    results = await asyncio.gather(*tasks)
+    print(f&quot;Сумма: {sum(results)}&quot;)
+
+start_time = time.time()
+asyncio.run(main())
+print(f&quot;Время: {time.time() - start_time:.4f} сек&quot;)
+</code></pre>
+<h3 id="_1">Результаты</h3>
+<table>
+<thead>
+<tr>
+<th>Подход</th>
+<th>Сумма</th>
+<th>Время</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>threading</td>
+<td>50 000 005 000 000</td>
+<td>0.0814 сек</td>
+</tr>
+<tr>
+<td>multiprocessing</td>
+<td>50 000 005 000 000</td>
+<td>0.3898 сек</td>
+</tr>
+<tr>
+<td>async</td>
+<td>50 000 005 000 000</td>
+<td>0.0823 сек</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_2">Вывод</h3>
+<p>Все три программы дали одинаковый результат. По времени threading и async оказались быстрее multiprocessing — это объясняется тем, что запуск отдельных процессов сам по себе требует времени (нужно создать процесс, выделить память, скопировать данные). При N = 10 000 000 задача недостаточно тяжёлая, чтобы эти накладные расходы окупились.</p>
+<p>Threading не дал реального ускорения по сравнению с однопоточным выполнением из-за GIL — потоки всё равно работают по очереди на CPU-задачах. Async тоже не даёт параллелизма здесь: нет точек <code>await</code> внутри вычислений, поэтому задачи выполняются последовательно.</p>
+<p>Multiprocessing выиграл бы при действительно большом N, где выгода от параллельного использования нескольких ядер перекрыла бы накладные расходы на запуск процессов.</p>
+<hr />
+<h2 id="2-">Задача 2. Параллельный парсинг веб-страниц</h2>
+<p>Каждая программа парсит заголовки страниц с нескольких сайтов и сохраняет их в базу данных из лабораторной работы №1 (PostgreSQL, таблица <code>pages</code>).</p>
+<h3 id="_3">Подготовка БД</h3>
+<pre><code class="language-python"># db_setup.py
+import sqlite3
+
+conn = sqlite3.connect(&quot;parsed_pages.db&quot;)
+conn.execute(&quot;&quot;&quot;
+    CREATE TABLE IF NOT EXISTS pages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        url TEXT,
+        title TEXT,
+        approach TEXT
+    )
+&quot;&quot;&quot;)
+conn.commit()
+conn.close()
+print(&quot;БД готова&quot;)
+</code></pre>
+<h3 id="parse_threadingpy">parse_threading.py</h3>
+<pre><code class="language-python">import threading
+import sqlite3
+import requests
+from bs4 import BeautifulSoup
+import time
+
+URLS = [
+    &quot;https://vk.com&quot;,
+    &quot;https://wikipedia.org&quot;,
+    &quot;https://github.com&quot;,
+]
+
+lock = threading.Lock()
+
+def parse_and_save(url):
+    try:
+        headers = {&quot;User-Agent&quot;: &quot;Mozilla/5.0&quot;}
+        html = requests.get(url, timeout=10, headers=headers).text
+        soup = BeautifulSoup(html, &quot;html.parser&quot;)
+        title = soup.title.string.strip() if soup.title else &quot;Без заголовка&quot;
+
+        with lock:
+            conn = sqlite3.connect(&quot;parsed_pages.db&quot;)
+            conn.execute(&quot;INSERT INTO pages VALUES (NULL, ?, ?, ?)&quot;, (url, title, &quot;threading&quot;))
+            conn.commit()
+            conn.close()
+
+        print(f&quot;{url} -&gt; {title}&quot;)
+    except Exception as e:
+        print(f&quot;ошибка {url}: {e}&quot;)
+
+start_time = time.time()
+
+threads = [threading.Thread(target=parse_and_save, args=(url,)) for url in URLS]
+for t in threads:
+    t.start()
+for t in threads:
+    t.join()
+
+print(f&quot;Время: {time.time() - start_time:.2f} сек&quot;)
+</code></pre>
+<h3 id="parse_multiprocessingpy">parse_multiprocessing.py</h3>
+<pre><code class="language-python">import multiprocessing
+import sqlite3
+import requests
+from bs4 import BeautifulSoup
+import time
+
+URLS = [
+    &quot;https://vk.com&quot;,
+    &quot;https://wikipedia.org&quot;,
+    &quot;https://github.com&quot;,
+]
+
+def parse_and_save(url):
+    try:
+        headers = {&quot;User-Agent&quot;: &quot;Mozilla/5.0&quot;}
+        html = requests.get(url, timeout=10, headers=headers).text
+        soup = BeautifulSoup(html, &quot;html.parser&quot;)
+        title = soup.title.string.strip() if soup.title else &quot;Без заголовка&quot;
+
+        conn = sqlite3.connect(&quot;parsed_pages.db&quot;)
+        conn.execute(&quot;INSERT INTO pages VALUES (NULL, ?, ?, ?)&quot;, (url, title, &quot;multiprocessing&quot;))
+        conn.commit()
+        conn.close()
+
+        print(f&quot;{url} -&gt; {title}&quot;)
+    except Exception as e:
+        print(f&quot;ошибка {url}: {e}&quot;)
+
+if __name__ == &quot;__main__&quot;:
+    start_time = time.time()
+    with multiprocessing.Pool(4) as pool:
+        pool.map(parse_and_save, URLS)
+    print(f&quot;Время: {time.time() - start_time:.2f} сек&quot;)
+</code></pre>
+<h3 id="parse_asyncpy">parse_async.py</h3>
+<pre><code class="language-python">import asyncio
+import aiohttp
+import aiosqlite
+from bs4 import BeautifulSoup
+import time
+
+URLS = [
+    &quot;https://vk.com&quot;,
+    &quot;https://wikipedia.org&quot;,
+    &quot;https://github.com&quot;,
+]
+
+async def parse_and_save(session, url, db):
+    try:
+        headers = {&quot;User-Agent&quot;: &quot;Mozilla/5.0&quot;}
+        async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=10)) as r:
+            html = await r.text()
+
+        soup = BeautifulSoup(html, &quot;html.parser&quot;)
+        title = soup.title.string.strip() if soup.title else &quot;Без заголовка&quot;
+
+        await db.execute(&quot;INSERT INTO pages VALUES (NULL, ?, ?, ?)&quot;, (url, title, &quot;async&quot;))
+        await db.commit()
+
+        print(f&quot;{url} -&gt; {title}&quot;)
+    except Exception as e:
+        print(f&quot;ошибка {url}: {e}&quot;)
+
+async def main():
+    connector = aiohttp.TCPConnector(ssl=False)
+    async with aiohttp.ClientSession(connector=connector) as session:
+        async with aiosqlite.connect(&quot;parsed_pages.db&quot;) as db:
+            await asyncio.gather(*[parse_and_save(session, url, db) for url in URLS])
+
+start_time = time.time()
+asyncio.run(main())
+print(f&quot;Время: {time.time() - start_time:.2f} сек&quot;)
+</code></pre>
+<h3 id="_4">Результаты</h3>
+<table>
+<thead>
+<tr>
+<th>Подход</th>
+<th>Время</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>threading</td>
+<td>0.90 сек</td>
+</tr>
+<tr>
+<td>multiprocessing</td>
+<td>1.71 сек</td>
+</tr>
+<tr>
+<td>async</td>
+<td>5.35 сек</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_5">Вывод</h3>
+<p>Здесь картина другая. Threading оказался быстрее всего — потоки хорошо справляются с сетевыми запросами, потому что GIL отпускается во время ожидания ответа от сервера, и потоки реально работают параллельно.</p>
+<p>Multiprocessing снова медленнее threading из-за накладных расходов на создание процессов — для трёх сайтов это явно избыточно.</p>
+<p>Async показал худший результат в этом конкретном запуске — скорее всего из-за проблем с SSL на Mac и дополнительных задержек при переподключении. В теории async должен быть сравним с threading или быстрее при большом количестве запросов, но на небольшом числе URL разница несущественна и на результат влияет скорость ответа конкретных сайтов в момент запуска.</p>
+<hr />
+<h2 id="_6">Общий вывод</h2>
+<p>Выбор подхода зависит от типа задачи:</p>
+<ul>
+<li><strong>Threading</strong> — хорош для небольшого количества сетевых запросов, прост в реализации</li>
+<li><strong>Multiprocessing</strong> — стоит использовать только для по-настоящему тяжёлых вычислений, где параллельное использование ядер окупает накладные расходы</li>
+<li><strong>Async</strong> — лучший выбор когда запросов много и важна масштабируемость, но требует асинхронных библиотек (aiohttp, aiosqlite и т.д.)</li>
+</ul></div>
+            </div>
+        </div>
+
+        <footer class="col-md-12">
+            <hr>
+            <p>Documentation built with <a href="https://www.mkdocs.org/">MkDocs</a>.</p>
+        </footer>
+        <script src="js/bootstrap.bundle.min.js"></script>
+        <script>
+            var base_url = ".",
+                shortcuts = {"help": 191, "next": 78, "previous": 80, "search": 83};
+        </script>
+        <script src="js/base.js"></script>
+        <script src="search/main.js"></script>
+
+        <div class="modal" id="mkdocs_search_modal" tabindex="-1" role="dialog" aria-labelledby="searchModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="searchModalLabel">Search</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>From here you can search these documents. Enter your search terms below.</p>
+                <form>
+                    <div class="form-group">
+                        <input type="search" class="form-control" placeholder="Search..." id="mkdocs-search-query" title="Type search term here">
+                    </div>
+                </form>
+                <div id="mkdocs-search-results" data-no-results-text="No results found"></div>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div><div class="modal" id="mkdocs_keyboard_modal" tabindex="-1" role="dialog" aria-labelledby="keyboardModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="keyboardModalLabel">Keyboard Shortcuts</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th style="width: 20%;">Keys</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td class="help shortcut"><kbd>?</kbd></td>
+                    <td>Open this help</td>
+                  </tr>
+                  <tr>
+                    <td class="next shortcut"><kbd>n</kbd></td>
+                    <td>Next page</td>
+                  </tr>
+                  <tr>
+                    <td class="prev shortcut"><kbd>p</kbd></td>
+                    <td>Previous page</td>
+                  </tr>
+                  <tr>
+                    <td class="search shortcut"><kbd>s</kbd></td>
+                    <td>Search</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="modal-footer">
+            </div>
+        </div>
+    </div>
+</div>
+
+    </body>
+</html>
+
+<!--
+MkDocs version : 1.6.1
+Build Date UTC : 2026-05-11 20:19:07.472821+00:00
+-->

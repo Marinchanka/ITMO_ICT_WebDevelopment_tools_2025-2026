@@ -1,0 +1,5 @@
+site_name: Лабораторные работы
+docs_dir: docs
+
+nav:
+  - Лабораторная работа 2: index.md
