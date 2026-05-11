@@ -14,11 +14,10 @@ load_dotenv()
 
 # Импортируем модели
 from app.models import SQLModel
-from app.models import User, Book, ExchangeRequest, Review, Wishlist
 
 # Конфигурация
 config = context.config
-db_url = os.getenv("DATABASE_URL", "postgresql://postgres:200516@localhost:5432/bookcrossing_db")
+db_url = os.getenv("DATABASE_URL")
 config.set_main_option("sqlalchemy.url", db_url)
 
 if config.config_file_name is not None:

@@ -95,7 +95,7 @@ class Review(SQLModel, table=True):
     reviewer_id: int = Field(foreign_key="user.id")
     reviewed_id: int = Field(foreign_key="user.id")
 
-    # Связи — указываем foreign_keys явно
+    # Связи
     reviewer: Optional["User"] = Relationship(
         back_populates="reviews_written",
         sa_relationship_kwargs={"foreign_keys": "Review.reviewer_id"}
